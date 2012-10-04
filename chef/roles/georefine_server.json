@@ -1,0 +1,23 @@
+{
+    "name": "georefine_server",
+    "chef_type": "role",
+    "json_class": "Chef::Role",
+    "description": "GeoRefine Server Role",
+    "run_list": [
+        "recipe[apache2]",
+        "recipe[apache2::mod_wsgi]",
+        "recipe[postgresql::server]",
+        "recipe[postgresql::client]",
+        "recipe[postgresql::ruby]",
+        "recipe[postgis]",
+        "recipe[mapserver]",
+        "recipe[georefine_server]"
+    ],
+    "override_attributes": {
+        "postgresql": {
+            "password": {
+                "postgres": "postgres"
+            }
+        }
+    }
+}

@@ -9,14 +9,10 @@ Vagrant::Config.run do |config|
     # config.vm.share_folder "v-data", "/vagrant_data", "../data"
 
     config.vm.provision :chef_solo do |chef|
-        chef.cookbooks_path = "../my-recipes/cookbooks"
-        chef.roles_path = "../my-recipes/roles"
-        chef.data_bags_path = "../my-recipes/data_bags"
-        chef.add_recipe "mysql"
-        chef.add_role "web"
-
-        # You may also specify custom JSON attributes:
-        chef.json = { :mysql_password => "foo" }
+        chef.cookbooks_path = ["chef/cookbooks", "chef/georefine_cookbooks"]
+        chef.roles_path = "chef/roles"
+        chef.data_bags_path = "chef/data_bags"
+        chef.add_role "georefine_server"
     end
 
 end
