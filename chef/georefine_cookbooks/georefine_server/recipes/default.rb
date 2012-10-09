@@ -1,6 +1,12 @@
 # Define georefine dir.
 georefine_dir = "/home/georefine"
 
+# Define virtualenv dir.
+georefine_venv = "#{georefine_dir}/venv"
+
+# Global var for py version.
+$py_version = ''
+
 # Create user.
 georefine_user = 'georefine'
 user georefine_user do
@@ -62,27 +68,59 @@ web_app "georefine" do
     app_wsgi_script_dir "#{georefine_dir}/wsgi"
 end
 
+# Get mod wsgi python intepreter version.
+py_version_block = ruby_block "get_mod_wsgi_interpreter_version" do
+    block do
+        current_mod_wsgi = `readlink -f /usr/lib/apache2/modules/mod_wsgi.so`
+        $py_version = current_mod_wsgi.scan(/\.so-(.+)/)[0]
+    end
+    action :nothing
+end
+# We execute the block during compile time so we can use the py_version later.
+py_version_block.run_action(:create)
+
 # Create virtualenv for georefine.
-# Will be triggered by ruby_block resource below.
 python_virtualenv 'georefine_venv' do
-    path "#{georefine_dir}/venv"
+    path georefine_venv
     owner georefine_user
     group georefine_user
     options '--no-site-packages'
-    interpreter {"python#{$mod_wsgi_py_version}"}
-    action :nothing
+    interpreter "python#{$py_version}"
+    action :create
 end
 
-
-# Get mod wsgi python intepreter version.
-$mod_wsgi_py_version = ''
-ruby_block "get_mod_wsgi_interpreter_version" do
-    block do
-        current_mod_wsgi = `readlink -f /usr/lib/apache2/modules/mod_wsgi.so`
-        $mod_wsgi_py_version = current_mod_wsgi.scan(/\.so-(.+)/)[0]
+# Install python libs. Will be triggered by creation of virtualenv.
+[
+    'sqlalchemy', 
+    'geoalchemy', 
+    'Flask', 
+    'Flask-Admin',
+    'Flask-OpenID',
+    'Flask-Login',
+    'psycopg2',
+].each do |lib|
+    python_pip lib do
+        virtualenv georefine_venv
+        action :nothing
+        subscribes :install, resources(:python_virtualenv => 'georefine_venv')
     end
-    notifies :create, resources(:python_virtualenv => 'georefine_venv'), :immediately
 end
+
+# Install mapscript. Will be trigger by creation of virtualenv.
+#@TODO: hack! copies from sys dir. Should make this independent later by building
+# standalone mapscript.
+package "python-mapscript" do
+    action :nothing
+    subscribes :install, resources(:python_virtualenv => 'georefine_venv')
+end
+
+execute "copy_mapscript" do
+    command "cp /usr/lib/python#{$py_version}/dist-packages/*mapscript* #{georefine_venv}/lib/python#{$py_version}/site-packages/"
+    action :nothing
+    subscribes :run, resources(:python_virtualenv => 'georefine_venv')
+end
+
+
 
 
 # Setup app config.
