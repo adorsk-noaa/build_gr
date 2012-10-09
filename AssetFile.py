@@ -13,6 +13,7 @@ assets = {
 
     'georefine_py' : {
         'type': 'git',
-        'source': 'https://github.com/adorsk-noaa/georefine.git'
+        'source': 'https://github.com/adorsk-noaa/georefine.git',
+        'path': 'georefine'
     }
 }
