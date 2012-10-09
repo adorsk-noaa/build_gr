@@ -9,6 +9,8 @@ $py_version = ''
 
 # Create user.
 georefine_user = 'georefine'
+georefine_user_pass = '$1$JXYcj8zJ$6hqs7XNGzj7aWCScX6FZi.'
+
 user georefine_user do
     home    georefine_dir    
     supports     :manage_home => true
@@ -32,6 +34,7 @@ georefine_db_connection = {
 }
 
 # Setup DB user.
+georefine_db = 'georefine'
 georefine_db_user = 'georefine'
 georefine_db_password = 'georefine' #@TODO: read from node attributes or dbag.
 postgresql_database_user georefine_db_user do
@@ -51,7 +54,7 @@ execute 'spatialize db' do
 end
 
 # Create db.
-postgresql_database 'georefine' do
+postgresql_database "#{georefine_db}" do
     connection georefine_db_connection
     owner georefine_db_user
     action :create
@@ -118,6 +121,28 @@ execute "copy_mapscript" do
     command "cp /usr/lib/python#{$py_version}/dist-packages/*mapscript* #{georefine_venv}/lib/python#{$py_version}/site-packages/"
     action :nothing
     subscribes :run, resources(:python_virtualenv => 'georefine_venv')
+end
+
+# Install json gem during compile phase, for use later.
+json_gem = gem_package 'json'
+json_gem.run_action(:install)
+require 'json'
+
+# Write out node data to a file the deploy system can download.
+file "node.json" do
+    path "#{georefine_dir}/node.json"
+    mode 0770
+    owner georefine_user
+    group georefine_user
+    content JSON.dump({
+        'db' => {
+            'name' => georefine_db,
+            'user' => georefine_db_user,
+            'pass' => georefine_db_password,
+            'port' => 5432,
+            'host' => 'localhost'
+        }
+    })
 end
 
 
