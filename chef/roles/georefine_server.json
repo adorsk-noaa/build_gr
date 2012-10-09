@@ -11,6 +11,7 @@
         "recipe[postgresql::ruby]",
         "recipe[postgis]",
         "recipe[mapserver]",
+        "recipe[python]",
         "recipe[georefine_server]"
     ],
     "override_attributes": {

@@ -8,7 +8,7 @@ user georefine_user do
     supports     :manage_home => true
 end
 
-# Create folder for code, data, and public files.
+# Create folder for virtualenv, code, data, and public files.
 ['lib', 'data', 'public', 'wsgi'].each do |dir_|
     dir_path = "#{georefine_dir}/#{dir_}"
     directory dir_path do
@@ -61,5 +61,28 @@ web_app "georefine" do
     app_path "/georefine"
     app_wsgi_script_dir "#{georefine_dir}/wsgi"
 end
+
+# Create virtualenv for georefine.
+# Will be triggered by ruby_block resource below.
+python_virtualenv 'georefine_venv' do
+    path "#{georefine_dir}/venv"
+    owner georefine_user
+    group georefine_user
+    options '--no-site-packages'
+    interpreter {"python#{$mod_wsgi_py_version}"}
+    action :nothing
+end
+
+
+# Get mod wsgi python intepreter version.
+$mod_wsgi_py_version = ''
+ruby_block "get_mod_wsgi_interpreter_version" do
+    block do
+        current_mod_wsgi = `readlink -f /usr/lib/apache2/modules/mod_wsgi.so`
+        $mod_wsgi_py_version = current_mod_wsgi.scan(/\.so-(.+)/)[0]
+    end
+    notifies :create, resources(:python_virtualenv => 'georefine_venv'), :immediately
+end
+
 
 # Setup app config.
