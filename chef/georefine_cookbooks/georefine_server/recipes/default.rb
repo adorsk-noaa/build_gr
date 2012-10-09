@@ -16,8 +16,8 @@ user georefine_user do
     supports     :manage_home => true
 end
 
-# Create folder for virtualenv, code, data, and public files.
-['lib', 'data', 'public', 'wsgi'].each do |dir_|
+# Create folder for virtualenv, releases, data, and public files.
+['releases', 'data', 'public', 'wsgi'].each do |dir_|
     dir_path = "#{georefine_dir}/#{dir_}"
     directory dir_path do
         owner georefine_user
@@ -115,6 +115,21 @@ end
 package "python-mapscript" do
     action :nothing
     subscribes :install, resources(:python_virtualenv => 'georefine_venv')
+end
+
+# Install libgdal-dev, necessary for fiona python lib. Will be trigger by creation of virtualenv.
+package "libgdal-dev" do
+    action :nothing
+    subscribes :install, resources(:python_virtualenv => 'georefine_venv')
+end
+
+# Install fiona and shapely, will be triggered by installation of libgdal-dev.
+['fiona', 'shapely'].each do |lib|
+    python_pip lib do
+        virtualenv georefine_venv
+        action :nothing
+        subscribes :install, resources(:package => 'libgdal-dev')
+    end
 end
 
 execute "copy_mapscript" do

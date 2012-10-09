@@ -4,12 +4,12 @@ import os
 
 
 # Get file's parent dir.
-parent_dir  = os.path.dirname(os.path.apspath(__file__))
+parent_dir  = os.path.dirname(os.path.abspath(__file__))
 
 # Define dirs to include.
 lib_dirs = [
     # App libs.
-    os.path.join(parent_dir, '..', 'libs'),
+    os.path.join(parent_dir, '..', 'lib'),
     # VirtualEnv libs
     #@TODO: a way to get the python version??
     os.path.join(parent_dir, '..', 'venv/lib/python2.6/site-packages'),

@@ -15,5 +15,17 @@ assets = {
         'type': 'git',
         'source': 'https://github.com/adorsk-noaa/georefine.git',
         'path': 'georefine'
+    },
+
+    'sa_dao' : {
+        'type': 'git',
+        'source': 'https://github.com/adorsk-noaa/sqlalchemy_dao.git',
+        'path': 'lib/sa_dao'
+    },
+
+    'flask_admin': {
+        'type': 'git',
+        'source': 'https://github.com/adorsk/flask-admin.git',
+        'path': 'flask_admin'
     }
 }
