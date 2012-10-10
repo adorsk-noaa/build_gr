@@ -47,8 +47,17 @@ end
 postgis_contrib_dir = "/usr/share/postgresql/#{node['postgresql']['version']}/contrib/postgis-1.5"
 postgis_sql = "#{postgis_contrib_dir}/postgis.sql"
 postgis_srs_sql = "#{postgis_contrib_dir}/spatial_ref_sys.sql"
+
+spatialize_command = <<-eos
+    createlang plpgsql georefine; psql -d georefine -f #{postgis_sql};
+    psql -d georefine -f #{postgis_srs_sql};
+eos
+['geometry_columns', 'geography_columns', 'spatial_ref_sys'].each do |table|
+    spatialize_command += "echo 'GRANT ALL ON #{table} TO #{georefine_db_user};' | psql -d georefine;"
+end
+
 execute 'spatialize db' do
-    command "createlang plpgsql georefine; psql -d georefine -f #{postgis_sql}; psql -d georefine -f #{postgis_srs_sql}"
+    command spatialize_command
     user 'postgres'
     action :nothing
 end
