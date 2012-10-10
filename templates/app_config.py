@@ -14,7 +14,3 @@ STATIC_DIR = "/home/georefine/public"
 PROJECT_STATIC_DIR_NAME = "public"
 
 PROJECT_STATIC_URL = lambda p: "/static/project_%s/public" % p.id
-
-
-
-

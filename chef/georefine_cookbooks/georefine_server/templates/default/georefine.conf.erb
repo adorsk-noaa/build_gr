@@ -52,4 +52,7 @@
 
   WSGIScriptAliasMatch ^/([^/]+) <%= @params[:app_wsgi_script_dir] %>/$1.wsgi
 
+  # Handle static files.
+  Alias /georefine/static/ <%= @params[:docroot] %>/
+
 </VirtualHost>
