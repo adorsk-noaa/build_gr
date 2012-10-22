@@ -1,6 +1,8 @@
 import sys
 import site 
 import os
+import logging
+logging.basicConfig(stream=sys.stderr)
 
 
 # Get file's parent dir.

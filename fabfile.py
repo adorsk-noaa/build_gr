@@ -43,12 +43,21 @@ def deploy():
         subprocess.call(cmd, shell=True)
 
     # Create static files dir.
-    #static_dir = os.path.join(dist_dir, 'public')
-    #os.mkdir(static_dir)
+    static_dir = os.path.join(dist_dir, 'public')
+    os.mkdir(static_dir)
 
-    # Assemble js/css.
+    # Make static assets dir.
+    static_assets_dir = os.path.join(static_dir, "assets")
+    os.mkdir(static_assets_dir)
 
-    # Copy to static dir.
+    #@TODO: optimize js/css.
+
+    # Populate js assets.
+    js_assets_dir = os.path.join(ASSETS_DIR, 'sasi_js_assets')
+    cmd = 'rsync -aL %s/ %s/js/' % (js_assets_dir, static_assets_dir)
+    subprocess.call(cmd, shell=True)
+
+    # Write require.js config.
 
     # Copy georefine.wsgi .
     wsgi_dir = os.path.join(dist_dir, 'wsgi')
@@ -89,6 +98,6 @@ def deploy():
     """
     Make symlinks.
     """
-    run('ln -nsf %s/lib ~/lib; ln -nsf %s/wsgi/georefine.wsgi ~/wsgi/georefine.wsgi;' %
-        (release_dir, release_dir)
-       )
+    run('ln -nsf %s/lib ~/lib' % release_dir)
+    run('ln -nsf %s/wsgi/georefine.wsgi ~/wsgi/georefine.wsgi;' % release_dir)
+    run('ln -nsf %s/public/assets ~/public/assets' % release_dir)
