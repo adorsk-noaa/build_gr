@@ -9,8 +9,6 @@ APPLICATION_ROOT = "/georefine"
 #@TODO: GET THIS FROM NODE DATA, stored outside of public version control.
 SQLALCHEMY_DATABASE_URI = "postgresql://georefine:georefine@localhost/georefine"
 
-STATIC_DIR = "/home/georefine/public"
+STATIC_FOLDER = "/home/georefine/public"
 
-PROJECT_STATIC_DIR_NAME = "public"
-
-PROJECT_STATIC_URL = lambda p: "/static/project_%s/public" % p.id
+STATIC_URL_PATH = "/static"
