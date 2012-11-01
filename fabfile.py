@@ -11,6 +11,7 @@ env.hosts = ['192.168.33.10']
 
 this_dir = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(this_dir, "assets")
+GR_ASSETS_DIR_NAME = "GeoRefine_Assets"
 templates_dir = os.path.join(this_dir, 'templates')
 tpl_env = Environment(loader=FileSystemLoader(templates_dir))
 
@@ -22,9 +23,9 @@ def deploy():
     #wrangler install
 
     """
-    Assemble distribution from assets.
+    Build distribution from assets.
     """
-    # create distribution dir.
+    # create dist dir.
     dist_container = tempfile.mkdtemp(prefix="gr_dist.")
     dist_dir = os.path.join(dist_container, "georefine_dist.%s" % os.getpid())
     os.mkdir(dist_dir)
@@ -43,29 +44,28 @@ def deploy():
         cmd = 'rsync -aL %s/ %s/%s/' % (lib_path, lib_dir, lib)
         subprocess.call(cmd, shell=True)
 
-    # Create static files dir.
-    static_dir = os.path.join(dist_dir, 'public')
-    os.mkdir(static_dir)
-
-    # Make static assets dir.
-    static_assets_dir = os.path.join(static_dir, "assets")
-    os.mkdir(static_assets_dir)
-
-    #@TODO: optimize js/css.
-
-    # Populate js assets.
-    js_assets_dir = os.path.join(ASSETS_DIR, 'sasi_js_assets')
-    cmd = 'rsync -aL %s/ %s/js/' % (js_assets_dir, static_assets_dir)
-    subprocess.call(cmd, shell=True)
-
-    # Write require.js config.
-
-    # Copy georefine.wsgi .
+    # Copy georefine.wsgi.
     wsgi_dir = os.path.join(dist_dir, 'wsgi')
     os.mkdir(wsgi_dir)
     shutil.copy(os.path.join(this_dir, "templates", "georefine.wsgi"),
                 os.path.join(wsgi_dir, "georefine.wsgi")
                )
+
+    # Create static files dir.
+    static_dir = os.path.join(dist_dir, 'public')
+    os.mkdir(static_dir)
+
+    # Make static assets dir.
+    gr_static_assets_dir = os.path.join(static_dir, GR_ASSETS_DIR_NAME)
+    os.mkdir(gr_static_assets_dir)
+
+    # Copy georefine client.
+    grc_dir = os.path.join(gr_static_assets_dir, 'GeoRefineClient')
+    shutil.copytree(os.path.join(ASSETS_DIR, "georefine_client"), grc_dir)
+
+    # Build GeoRefineClient.
+    grc_dist_dir = os.path.join(grc_dir, 'dist')
+    build_grc(dist_dir=grc_dist_dir)
 
     """
     Write config file.
@@ -101,15 +101,17 @@ def deploy():
     """
     run('ln -nsf %s/lib ~/lib' % release_dir)
     run('ln -nsf %s/wsgi/georefine.wsgi ~/wsgi/georefine.wsgi;' % release_dir)
-    run('ln -nsf %s/public/assets ~/public/assets' % release_dir)
+    run('ln -nsf %s/public/%s ~/public/%s' % (release_dir, GR_ASSETS_DIR_NAME,
+                                              GR_ASSETS_DIR_NAME))
 
 @task
-def build_grc():
+def build_grc(dist_dir=None):
     """ Build the GeoRefineClient project."""
     # Fetch assets.
     assets_dir = os.path.join(os.path.dirname(__file__), "assets")
-    dist_dir = os.path.join(os.path.dirname(__file__), "dist",
-                            "georefine_client")
+    if not dist_dir:
+        dist_dir = os.path.join(os.path.dirname(__file__), "dist",
+                                "georefine_client")
 
     # Make build dir.
     build_dir = tempfile.mkdtemp(prefix="grcBuild.")

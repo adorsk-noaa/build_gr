@@ -20,7 +20,7 @@ assets = {
     'georefine_client' : {
         'type': 'git',
         'source': 'https://github.com/adorsk-noaa/georefine.git',
-        'path': 'georefine/app/static/js/GeoRefineClient'
+        'path': 'georefine/app/static/GeoRefine_Assets/GeoRefineClient'
     },
 
     'sa_dao' : {
