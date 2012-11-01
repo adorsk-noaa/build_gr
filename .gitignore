@@ -3,5 +3,6 @@ py2.7
 assets
 cache
 node.json
+dist
 
 *.pyc

@@ -17,6 +17,12 @@ assets = {
         'path': 'georefine'
     },
 
+    'georefine_client' : {
+        'type': 'git',
+        'source': 'https://github.com/adorsk-noaa/georefine.git',
+        'path': 'georefine/app/static/js/GeoRefineClient'
+    },
+
     'sa_dao' : {
         'type': 'git',
         'source': 'https://github.com/adorsk-noaa/sqlalchemy_dao.git',

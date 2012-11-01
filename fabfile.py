@@ -14,6 +14,7 @@ ASSETS_DIR = os.path.join(this_dir, "assets")
 templates_dir = os.path.join(this_dir, 'templates')
 tpl_env = Environment(loader=FileSystemLoader(templates_dir))
 
+@task
 def deploy():
     """
     Check out assets.
@@ -101,3 +102,35 @@ def deploy():
     run('ln -nsf %s/lib ~/lib' % release_dir)
     run('ln -nsf %s/wsgi/georefine.wsgi ~/wsgi/georefine.wsgi;' % release_dir)
     run('ln -nsf %s/public/assets ~/public/assets' % release_dir)
+
+@task
+def build_grc():
+    """ Build the GeoRefineClient project."""
+    # Fetch assets.
+    assets_dir = os.path.join(os.path.dirname(__file__), "assets")
+    dist_dir = os.path.join(os.path.dirname(__file__), "dist",
+                            "georefine_client")
+
+    # Make build dir.
+    build_dir = tempfile.mkdtemp(prefix="grcBuild.")
+    # Copy GRC to build dir.
+    shutil.copytree(
+        os.path.join(assets_dir, 'georefine_client'), 
+        os.path.join(build_dir, 'georefine_client'), 
+    )
+    # Link assets.
+    link_cmd = "mkdir %s/georefine_client/assets; ln -s %s %s/georefine_client/assets/js;" % (
+        build_dir, assets_dir, build_dir)
+    subprocess.call(link_cmd, shell=True)
+
+    # Run build.
+    build_cmd = "node %s/georefine_client/build.js" % build_dir
+    subprocess.call(build_cmd, shell=True)
+
+    # Copy dist to local dist, after clearing.
+    if os.path.exists(dist_dir):
+        shutil.rmtree(dist_dir)
+    shutil.copytree("%s/georefine_client/dist" % build_dir, dist_dir)
+
+    # Remove build dir.
+    shutil.rmtree(build_dir)
