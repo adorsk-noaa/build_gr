@@ -4,23 +4,10 @@ config = {
 }
 
 assets = {
-
-    'sasi_js_assets': {
-        'type': 'rsync',
-        'source': '/var/www/sasi.localhost/sasi_assets/js',
-        'args': '--exclude **.git'
-    },
-
-    'georefine_py' : {
+    'georefine' : {
         'type': 'git',
         'source': 'https://github.com/adorsk-noaa/georefine.git',
-        'path': 'georefine'
-    },
-
-    'georefine_client' : {
-        'type': 'git',
-        'source': 'https://github.com/adorsk-noaa/georefine.git',
-        'path': 'georefine/app/static/GeoRefine_Assets/GeoRefineClient'
+        'path': 'georefine',
     },
 
     'sa_dao' : {
@@ -29,9 +16,14 @@ assets = {
         'path': 'lib/sa_dao'
     },
 
-    'flask_admin': {
+    'georefine_client' : {
         'type': 'git',
-        'source': 'https://github.com/adorsk/flask-admin.git',
-        'path': 'flask_admin'
-    }
+        'source': 'https://github.com/adorsk-noaa/grc2.git',
+    },
+
+    'task_manager' : {
+        'type': 'git',
+        'source': 'https://github.com/adorsk/TaskManager.git',
+        'path': 'lib/task_manager',
+    },
 }
