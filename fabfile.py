@@ -12,7 +12,7 @@ env.user = 'sasi'
 env.hosts = ['128.128.104.193']
 remote_releases_dir = "~/apps/georefine/releases"
 remote_persistent_dir = "~/apps/georefine/persistent"
-remote_tmp = '~/tmp'
+remote_tmp = '/tmp'
 
 this_dir = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(this_dir, "assets")
